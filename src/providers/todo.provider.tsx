@@ -3,9 +3,9 @@ import { Folder } from "../types/Folder.type";
 
 interface DataValue {
     folders: Array<Folder>;
-    addNewFolder(data: Folder): void;
-    deleteFolder(id: number): void;
-    updateFolder(id: number, data: any): void;
+    addNewFolder(data: Folder, parentId?: number): void;
+    deleteFolder(id: number, parentId?: number): void;
+    updateFolder(id: number, data: any, parentId?: number): void;
 }
 const initialValues: DataValue = {
     folders: [],
@@ -22,7 +22,7 @@ const TodoProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (localStorage) {
-            console.log('DID MOUNT')
+            // console.log('DID MOUNT')
             const foldersLocal = localStorage.getItem('folders');
             setFolders(JSON.parse(foldersLocal || '[]'))
         }
@@ -30,26 +30,48 @@ const TodoProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (localStorage) {
-            console.log('SET LOCAL')
+            // console.log('SET LOCAL')
             localStorage.setItem('folders', JSON.stringify(folders || '[]'))
         }
     }, [folders])
 
-    const addNewFolder = (data: Folder) => {
+    const addNewFolder = (data: Folder, parentId?: number) => {
         const curFolders = [...folders];
+        if (parentId) {
+            const updatedIdx = curFolders.findIndex(i => i.id === parentId);
+            const childId = Date.now();
+            const curChildren = curFolders[updatedIdx]['children'] ? {...curFolders[updatedIdx]['children']} : {};
+            curChildren[childId] = { ...data, id: childId };
+            curFolders[updatedIdx]['children'] = { ...curChildren };
+            setFolders(curFolders)
+            return
+        }
         curFolders.push({
             name: data.name,
             id: Date.now()
         });
         setFolders(curFolders)
     }
-    const deleteFolder = (id: number) => {
+    const deleteFolder = (id: number, parentId?: number) => {
         let curFolders = [...folders];
+        if (parentId) {
+            const updatedIdx = curFolders.findIndex(i => i.id === parentId);
+            curFolders[updatedIdx]['children'][id] = undefined;
+            setFolders(curFolders);
+            return
+        }
+        
         curFolders = curFolders.filter(item => item.id !== id);
         setFolders(curFolders)
     }
-    const updateFolder = (id: number, data: any) => {
+    const updateFolder = (id: number, data: any, parentId?: number) => {
         let curFolders = [...folders];
+        if (parentId) {
+            const updatedIdx = curFolders.findIndex(i => i.id === parentId);
+            curFolders[updatedIdx]['children'][id] = { ...curFolders[updatedIdx]['children'][id], ...data };
+            setFolders(curFolders);
+            return
+        }
         const updatedIdx = curFolders.findIndex(i => i.id === id);
         curFolders[updatedIdx] = {...curFolders[updatedIdx], ...data};
         setFolders(curFolders)
