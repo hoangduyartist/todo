@@ -1,8 +1,9 @@
-import React from 'react';
+// import React from 'react';
 // import logo from './logo.svg';
 import './App.css';
-import { TodoProvider } from './providers/todo.provider';
-import Todo from './todo';
+// import { TodoProvider } from './providers/todo.provider';
+// import Todo from './todo';
+import FPTest from './fpTest';
 
 function App() {
   return (
@@ -24,9 +25,10 @@ function App() {
           Learn React
         </a>
       </header> */}
-      <TodoProvider>
+      {/* <TodoProvider>
         <Todo />
-      </TodoProvider>
+      </TodoProvider> */}
+      <FPTest />
     </div>
   );
 }
